@@ -1,7 +1,10 @@
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 
 public class MainFrame extends JFrame {
     private JPanel listsPanel;
@@ -10,9 +13,11 @@ public class MainFrame extends JFrame {
     private JPanel tablePanel;
     private JPanel buttonsPanel;
     private DefaultListModel<String> modelLeft, modelRight;
-    public static int SIZE = 3;
+    public static final int SIZE = 3;
+    public static final int NUMBER_OF_IMAGES = 4;
+    public static final String[] IMAGES_PATHS = {"Cancel.png", "Ok.jpeg", "Select.jpeg", "Pressed.jpeg"};
 
-    public MainFrame(){
+    public MainFrame() {
         super("Card app");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         pack();
@@ -91,16 +96,17 @@ public class MainFrame extends JFrame {
         });
     }
 
-    private void createTablePanel(){
+    private void createTablePanel() {
         tablePanel = new JPanel(new GridLayout(SIZE, SIZE));
         MouseListener ml = new MouseAdapter() {
             private String capturing;
             private final Color BACKGROUND_COLOR = UIManager.getColor(new JButton());
+
             @Override
             public void mousePressed(MouseEvent e) {
                 super.mousePressed(e);
-                if(e.getButton() == MouseEvent.BUTTON1){
-                    JButton button = (JButton)e.getSource();
+                if (e.getButton() == MouseEvent.BUTTON1) {
+                    JButton button = (JButton) e.getSource();
                     capturing = button.getText();
                     button.setText("Pressed");
                 }
@@ -109,25 +115,25 @@ public class MainFrame extends JFrame {
             @Override
             public void mouseReleased(MouseEvent e) {
                 super.mouseReleased(e);
-                JButton button = (JButton)e.getSource();
+                JButton button = (JButton) e.getSource();
                 button.setText(capturing);
             }
 
             @Override
             public void mouseEntered(MouseEvent e) {
                 super.mouseEntered(e);
-                JButton button = (JButton)e.getSource();
+                JButton button = (JButton) e.getSource();
                 button.setBackground(new Color(255, 255, 0));
             }
 
             @Override
             public void mouseExited(MouseEvent e) {
                 super.mouseExited(e);
-                JButton button = (JButton)e.getSource();
+                JButton button = (JButton) e.getSource();
                 button.setBackground(BACKGROUND_COLOR);
             }
         };
-        for(int i = 0; i < SIZE*SIZE; i++){
+        for (int i = 0; i < SIZE * SIZE; i++) {
             JButton button = new JButton("Button " + i);
             button.addMouseListener(ml);
             tablePanel.add(button);
@@ -138,62 +144,27 @@ public class MainFrame extends JFrame {
         buttonsPanel = new JPanel(new GridLayout(SIZE, 2));
         ButtonGroup buttonGroup = new ButtonGroup();
 
-        BufferedImage cancelImage = new BufferedImage(50, 50, BufferedImage.TYPE_INT_RGB);
-        BasicStroke basicStroke = new BasicStroke(10);
-        Graphics2D cancelImageGraphics = (Graphics2D)cancelImage.getGraphics();
-        cancelImageGraphics.setColor(Color.WHITE);
-        cancelImageGraphics.fillRect(0, 0, 50, 50);
-        cancelImageGraphics.setColor(Color.GRAY);
-        cancelImageGraphics.setStroke(basicStroke);
-        cancelImageGraphics.drawLine(0, 0, 50, 50);
-        cancelImageGraphics.drawLine(50, 0, 0, 50);
-
-        BufferedImage okImage = new BufferedImage(50, 50, BufferedImage.TYPE_INT_RGB);
-        Graphics2D okImageGraphics = (Graphics2D)okImage.getGraphics();
-        okImageGraphics.setColor(Color.WHITE);
-        okImageGraphics.fillRect(0, 0, 50, 50);
-        okImageGraphics.setColor(new Color(255, 255, 0));
-        okImageGraphics.setStroke(basicStroke);
-        okImageGraphics.drawLine(0, 25, 25, 50);
-        okImageGraphics.drawLine(25, 50, 50, 0);
-
-        BufferedImage rolloverImage = new BufferedImage(50, 50, BufferedImage.TYPE_INT_RGB);
-        Graphics2D rolloverImageGraphics = (Graphics2D)rolloverImage.getGraphics();
-        rolloverImageGraphics.setColor(Color.WHITE);
-        rolloverImageGraphics.fillRect(0, 0, 50, 50);
-        rolloverImageGraphics.setColor(Color.BLUE);
-        rolloverImageGraphics.setStroke(basicStroke);
-        rolloverImageGraphics.drawOval(5, 5, 40, 40);
-
-        BufferedImage pressedImage = new BufferedImage(50, 50, BufferedImage.TYPE_INT_RGB);
-        Graphics2D pressedImageGraphics = (Graphics2D)pressedImage.getGraphics();
-        pressedImageGraphics.setColor(Color.WHITE);
-        pressedImageGraphics.fillRect(0, 0, 50, 50);
-        pressedImageGraphics.setColor(Color.BLUE);
-        pressedImageGraphics.fillOval(5, 5, 40, 40);
-
-        for (int i = 0; i < SIZE * 2; i++) {
-            JRadioButton radioButton = new JRadioButton();
-            radioButton.setIcon(new ImageIcon(cancelImage));
-            radioButton.setSelectedIcon(new ImageIcon(okImage));
-            radioButton.setRolloverIcon(new ImageIcon(rolloverImage));
-            radioButton.setPressedIcon(new ImageIcon(pressedImage));
-            buttonGroup.add(radioButton);
-            buttonsPanel.add(radioButton);
+        ImageIcon[] imageIcons = new ImageIcon[4];
+        try {
+            for (int i = 0; i < NUMBER_OF_IMAGES; i++) {
+                BufferedImage buff = ImageIO.read(new File(IMAGES_PATHS[i]));
+                imageIcons[i] = new ImageIcon(buff);
+            }
+            for (int i = 0; i < SIZE * 2; i++) {
+                JRadioButton radioButton = new JRadioButton();
+                radioButton.setIcon(imageIcons[0]);
+                radioButton.setSelectedIcon(imageIcons[1]);
+                radioButton.setRolloverIcon(imageIcons[2]);
+                radioButton.setPressedIcon(imageIcons[3]);
+                buttonGroup.add(radioButton);
+                buttonsPanel.add(radioButton);
+            }
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(null, "Images loading error");
         }
     }
 
-    private ImageIcon createImageIcon(String path) {
-        java.net.URL imgURL = getClass().getResource(path);
-        if (imgURL != null) {
-            return new ImageIcon(imgURL);
-        } else {
-            return null;
-        }
-    }
-
-
-    public static void main(String[] args){
+    public static void main(String[] args) {
         MainFrame mainFrame = new MainFrame();
         mainFrame.setVisible(true);
     }
